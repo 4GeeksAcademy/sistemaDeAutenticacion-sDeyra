@@ -44,3 +44,21 @@ def login():
         "user": usuario.serialize()
     }
     return jsonify(response_body), 200
+
+@api.route("/register", methods=["POST"])
+def register():
+    email = request.json.get("email", None)
+    password = request.json.get("password", None)
+
+    usuario=User.query.filter_by(email=email).first() #se hace la busqueda
+    if usuario is None: #si el usuario no existe lo va a crear
+        new_user= User( #crear la variable del nuevo usuario con los datos que queremos guardar en la tabla
+            email=email,
+            password=password,
+            is_active=True
+        )
+        db.session.add(new_user) #agrega
+        db.session.commit() #guarda
+        return jsonify({"msg": "El usuario ha sido registrado"}), 201
+
+    return jsonify({"msg": "Existe el usuario"}), 302
