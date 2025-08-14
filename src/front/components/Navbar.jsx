@@ -1,19 +1,33 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 
 export const Navbar = () => {
-	
-	const [token,setToken]= useState(localStorage.getItem("access_token"))
+	const navigate=useNavigate()
+	const [token, setToken] = useState(localStorage.getItem("access_token"))
 
 	const cerrarSesion = () => {
 		localStorage.removeItem("access_token")
 		localStorage.removeItem("usuario")
-		setToken("")
+		setToken(null)
+		navigate("/")
 	}
 
 	useEffect(() => {
-		// token = localStorage.getItem("access_token")
-	}, [token])
+		const handleStorageChange = () => {
+			setToken(localStorage.getItem("access_token"));
+		};
+
+		// Escuchar cambios en localStorage (ej: cuando el login guarda el token)
+		window.addEventListener("storage", handleStorageChange);
+
+		// También revisar en cada render (opcional pero seguro)
+		handleStorageChange();
+
+		return () => {
+			window.removeEventListener("storage", handleStorageChange);
+		};
+	}, [token]);
+
 	return (
 		<nav className="navbar navbar-light bg-light">
 			<div className="container">
@@ -29,9 +43,9 @@ export const Navbar = () => {
 							<button className="btn btn-primary">Registrarse</button>
 						</Link>
 					</div>
-				) :
+				) :(
 					<button onClick={cerrarSesion} className="btn btn-primary">Cerrar sesion</button>
-				}
+				)}
 			</div>
 		</nav>
 	);
